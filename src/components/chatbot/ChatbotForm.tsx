@@ -1,19 +1,42 @@
 import { useRef, useState } from "react";
 
-const ChatbotForm = ({ chatHistory, setChatHistory, generateBotResponse }) => {
+type Chat = {
+  role: "user" | "bot";
+  text: string;
+};
+
+type Props = {
+  chatHistory: Chat[];
+  setChatHistory: React.Dispatch<React.SetStateAction<Chat[]>>;
+  generateBotResponse: (history: Chat[]) => Promise<void>;
+};
+
+const ChatbotForm = ({ chatHistory, setChatHistory, generateBotResponse }: Props) => {
   const [input, setInput] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!inputRef.current) return;
+
     const userMessage = inputRef.current.value.trim();
     if (!userMessage) return;
 
-    setChatHistory(prev => [...prev, { role: "user", text: userMessage }]);
+    // 👇 Explicitly typed so TS doesn't cry
+    const updatedHistory: Chat[] = [
+      ...chatHistory,
+      { role: "user", text: userMessage }
+    ];
+
+    setChatHistory((prev: Chat[]) => [
+      ...prev,
+      { role: "user", text: userMessage }
+    ]);
+
     setInput("");
 
-    // Generate bot response
-    await generateBotResponse([...chatHistory, { role: "user", text: userMessage }]);
+    await generateBotResponse(updatedHistory);
   };
 
   return (
@@ -29,6 +52,7 @@ const ChatbotForm = ({ chatHistory, setChatHistory, generateBotResponse }) => {
         placeholder="Ask me anything..."
         className="flex-1 bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none"
       />
+
       <button
         type="submit"
         className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-1"
