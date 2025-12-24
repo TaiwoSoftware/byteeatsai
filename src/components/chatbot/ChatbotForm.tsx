@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 
-type Chat = {
-  role: "user" | "bot";
+export type Chat = {
+  role: "user" | "bot" | "model";
   text: string;
 };
 
@@ -17,25 +17,22 @@ const ChatbotForm = ({ chatHistory, setChatHistory, generateBotResponse }: Props
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!inputRef.current) return;
 
     const userMessage = inputRef.current.value.trim();
     if (!userMessage) return;
 
-    // 👇 Explicitly typed so TS doesn't cry
     const updatedHistory: Chat[] = [
       ...chatHistory,
-      { role: "user", text: userMessage }
+      { role: "user", text: userMessage },
     ];
 
-    setChatHistory((prev: Chat[]) => [
+    setChatHistory(prev => [
       ...prev,
-      { role: "user", text: userMessage }
+      { role: "user", text: userMessage },
     ]);
 
     setInput("");
-
     await generateBotResponse(updatedHistory);
   };
 

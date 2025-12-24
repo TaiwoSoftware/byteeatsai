@@ -10,6 +10,7 @@ type Props = {
 const ChatMessage = ({ chat }: Props) => {
   const isUser = chat.role === "user";
 
+
   return (
     <div className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}>
       <div
