@@ -1,0 +1,56 @@
+import "./App.css";
+import { LandingPage } from "./components/landing_page/LandingPage";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Navbar } from "./components/landing_page/Navbar";
+import { Cart } from "./components/cart/Cart";
+import { ErrorPage } from "./components/Error/ErrorPage";
+import { About } from "./components/About/About";
+import { Contact } from "./components/Contact/Contact";
+import { NewUser } from "./components/Auth/NewUser";
+import Footer from "./components/landing_page/Footer";
+import { Login } from "./components/Auth/Login";
+import { Shop } from "./components/Shop/Shop";
+import { VendorsPage } from "./components/vendors/VendorsPage";
+import { VendorsDashboard } from "./components/vendors/VendorsDashboard";
+import AiAssitantPage from "./components/AiAssitantPage/AiAssitantPage";
+import { Profile } from "./components/Profile/Profile";
+import { CartProvider } from "./components/cart/CartContext";
+import UserSelection from "./components/landing_page/UserSelection";
+import { AdminDashboard } from "./components/Admin/AdminDashboard";
+import { ConfirmEmail } from "./components/Auth/ConfirmEmail";
+import BlockchainIntegration from "./components/BlockchainIntegration/BlockchainIntegration";
+import ChatbotAI from "./components/chatbot/ChatbotAI";
+import Order from "./components/Order/Order";
+// import { TrackOrderPa } from "./components/cart/TrackOrderPage";
+export const App = () => {
+  return (
+    <>
+      <CartProvider>
+        <Router>
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/user" element={<NewUser />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="*" element={<ErrorPage />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/confirm" element={<ConfirmEmail />} />
+            <Route path="/select" element={<UserSelection />} />
+            <Route path="/vendor" element={<VendorsPage />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/aiassistant" element={<AiAssitantPage />} />
+            <Route path="/order" element={<Order />} />
+            <Route path="/vendor_dashboard" element={<VendorsDashboard />} />
+            <Route path="/blockchain" element={<BlockchainIntegration />} />
+          </Routes>
+          <ChatbotAI />
+          <Footer />
+        </Router>
+      </CartProvider>
+    </>
+  );
+};
