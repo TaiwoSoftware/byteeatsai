@@ -1,28 +1,22 @@
 import { useRef, useState } from "react";
-
-export type Chat = {
-  role: "user" | "bot" | "model";
-  text: string;
-};
+import type { ChatMessageType } from "./ChatbotAI";
 
 type Props = {
-  chatHistory: Chat[];
-  setChatHistory: React.Dispatch<React.SetStateAction<Chat[]>>;
-  generateBotResponse: (history: Chat[]) => Promise<void>;
+  chatHistory: ChatMessageType[];
+  setChatHistory: React.Dispatch<React.SetStateAction<ChatMessageType[]>>;
+  generateBotResponse: (history: ChatMessageType[]) => Promise<void>;
 };
 
-const ChatbotForm = ({ chatHistory, setChatHistory, generateBotResponse }: Props) => {
+const ChatbotForm: React.FC<Props> = ({ chatHistory, setChatHistory, generateBotResponse }) => {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputRef.current) return;
-
-    const userMessage = inputRef.current.value.trim();
+    const userMessage = input.trim();
     if (!userMessage) return;
 
-    const updatedHistory: Chat[] = [
+    const updatedHistory: ChatMessageType[] = [
       ...chatHistory,
       { role: "user", text: userMessage },
     ];
@@ -33,6 +27,7 @@ const ChatbotForm = ({ chatHistory, setChatHistory, generateBotResponse }: Props
     ]);
 
     setInput("");
+    inputRef.current?.focus();
     await generateBotResponse(updatedHistory);
   };
 
@@ -61,4 +56,4 @@ const ChatbotForm = ({ chatHistory, setChatHistory, generateBotResponse }: Props
   );
 };
 
-export default ChatbotForm;
+export default ChatbotForm; 

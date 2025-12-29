@@ -2,13 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import ChatbotForm from "./ChatbotForm";
 import ChatMessage from "./ChatMessage";
 
-type ChatMessageType = {
-  role: "user" | "model";
+export type ChatMessageType = {
+  role: "user" | "bot";
   text: string;
 };
 
-const ChatbotAI = () => {
-  const [open, setOpen] = useState(false);
+const ChatbotAI: React.FC = () => {
+  const [open, setOpen] = useState<boolean>(false);
   const [chatHistory, setChatHistory] = useState<ChatMessageType[]>([]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -16,8 +16,10 @@ const ChatbotAI = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatHistory]);
 
-  const generateBotResponse = async (history: ChatMessageType[]) => {
-    setChatHistory(prev => [...prev, { role: "model", text: "Thinking..." }]);
+  const generateBotResponse = async (
+    history: ChatMessageType[]
+  ): Promise<void> => {
+    setChatHistory(prev => [...prev, { role: "bot", text: "Thinking..." }]);
 
     const payload = history.map(({ role, text }) => ({
       role,
@@ -46,13 +48,13 @@ const ChatbotAI = () => {
 
       setChatHistory(prev => [
         ...prev.filter(msg => msg.text !== "Thinking..."),
-        { role: "model", text: botText },
+        { role: "bot", text: botText },
       ]);
     } catch (error) {
       console.error(error);
       setChatHistory(prev => [
         ...prev.filter(msg => msg.text !== "Thinking..."),
-        { role: "model", text: "Oops! Something went wrong." },
+        { role: "bot", text: "Oops! Something went wrong." },
       ]);
     }
   };
@@ -68,7 +70,6 @@ const ChatbotAI = () => {
 
       {open && (
         <div className="fixed bottom-0 right-0 w-full sm:w-96 h-[70vh] bg-white shadow-2xl border-t sm:border rounded-t-2xl sm:rounded-lg flex flex-col z-50">
-
           <div className="p-4 border-b flex items-center justify-between bg-white sticky top-0 z-10">
             <h3 className="text-lg font-semibold text-gray-800">
               AI Assistant 🤖

@@ -10,7 +10,6 @@ type Props = {
 const ChatMessage = ({ chat }: Props) => {
   const isUser = chat.role === "user";
 
-
   return (
     <div className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}>
       <div
@@ -22,10 +21,14 @@ const ChatMessage = ({ chat }: Props) => {
           }`}
       >
         {!isUser && <span className="mr-2">🤖</span>}
-        <span dangerouslySetInnerHTML={{ __html: chat.text }} />
+        {isUser ? (
+          <span>{chat.text}</span>
+        ) : (
+          <span dangerouslySetInnerHTML={{ __html: chat.text }} />
+        )}
       </div>
     </div>
   );
 };
 
-export default ChatMessage;
+export default ChatMessage; 
