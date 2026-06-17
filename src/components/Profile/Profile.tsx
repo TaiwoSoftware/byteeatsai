@@ -4,6 +4,7 @@ import { supabase } from "../Auth/supabaseClient";
 import { Link, useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 import AccountSetting from "../Setting/AccountSetting";
+import { FaStore } from "react-icons/fa";
 
 interface User {
   id: string;
@@ -70,6 +71,7 @@ const Sidebar: React.FC = () => {
         <div className="flex items-center gap-3">
           <span>🛒</span>
           <span>Cart</span>
+          
         </div>
 
         <span className="bg-orange-700 text-white text-xs px-2 py-1 rounded-full">
@@ -86,6 +88,16 @@ const Sidebar: React.FC = () => {
       >
         <span>⚙️</span>
         <span>Settings</span>
+      </a>
+    </li>
+    <li>
+      <a
+        href="/vendor_dashboard"
+        className="flex items-center gap-3 px-4 py-3 rounded-lg
+        text-gray-300 hover:text-white hover:bg-gray-800 transition"
+      >
+        <FaStore />
+        <span>My Shop Dashboard</span>
       </a>
     </li>
   </ul>

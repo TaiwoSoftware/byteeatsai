@@ -112,21 +112,6 @@ export const AdminDashboard = () => {
       }
     };
 
-    // const deleteUser = async (userId: string) => {
-    //   try {
-    //     const { error } = await supabase
-    //       .from('profiles')
-    //       .delete()
-    //       .eq('id', userId);
-
-    //     if (error) throw error;
-        
-    //     // Refresh the users count
-    //     fetchTotalUsers();
-    //   } catch (err) {
-    //     console.error("Error deleting user:", err);
-    //   }
-    // };
 
     setupAuth();
     fetchTotalUsers();
@@ -173,7 +158,7 @@ export const AdminDashboard = () => {
     </h2>
 
     <nav className="space-y-2">
-      {["Dashboard", "Users", "Vendors", "Content", "Security", "Settings"].map(
+      {["Dashboard", "Users", "Vendors", "Content", "Settings"].map(
         (item) => (
           <Link
             key={item}
