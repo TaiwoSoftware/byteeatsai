@@ -27,7 +27,7 @@ export const AdminDashboard = () => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [foodImages, setFoodImages] = useState<FoodImage[]>([]);
   const [, setUser] = useState<User | null>(null);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectedUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -237,7 +237,7 @@ export const AdminDashboard = () => {
           </h2>
 
           <div className="bg-white rounded-2xl shadow-lg p-6">
-            <Users onSelectUser={(id: string) => setSelectedUserId(id)} />
+            <Users  />
           </div>
 
           {selectedUserId && (

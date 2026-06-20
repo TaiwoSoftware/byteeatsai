@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../Auth/supabaseClient";
-
-interface UsersProps {
-  onSelectUser: (id: string) => void;
-}
-
-const Users = ({ onSelectUser }: UsersProps) => {
+const Users = () => {
   const [users, setUsers] = useState<any[]>([]);
 
   useEffect(() => {
