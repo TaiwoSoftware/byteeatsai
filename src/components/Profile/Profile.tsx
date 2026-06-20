@@ -43,73 +43,102 @@ const Sidebar: React.FC = () => {
   }, []);
 
   return (
-    <div className="sidebar bg-gray-900 text-white w-full md:w-64 min-h-screen p-6">
-  {/* Brand */}
-  <h2 className="text-2xl font-bold text-orange-700 mb-10">
-    My Account
-  </h2>
+    <div
+      className="
+    bg-gray-900 text-white
+    w-full md:w-64
+    md:min-h-screen
+    p-4 sm:p-6
+    flex flex-col
+    shrink-0
+  "
+    >
+      {/* Brand */}
+      <h2 className="text-xl sm:text-2xl font-bold text-orange-700 mb-6 md:mb-10">
+        My Account
+      </h2>
 
-  {/* Menu */}
-  <ul className="space-y-3">
-    <li>
-      <a
-        href="#profile"
-        className="flex items-center gap-3 px-4 py-3 rounded-lg
-        text-gray-300 hover:text-white hover:bg-gray-800 transition"
-      >
-        <span>👤</span>
-        <span>Profile</span>
-      </a>
-    </li>
+      {/* Menu */}
+      <ul className="space-y-2 md:space-y-3">
+        <li>
+          <a
+            href="#profile"
+            className="
+          flex items-center gap-3
+          px-4 py-3 rounded-lg
+          text-gray-300
+          hover:text-white hover:bg-gray-800
+          transition
+        "
+          >
+            <span>👤</span>
+            <span>Profile</span>
+          </a>
+        </li>
 
-    <li>
-      <Link
-        to="/cart"
-        className="flex items-center justify-between px-4 py-3 rounded-lg
-        text-gray-300 hover:text-white hover:bg-gray-800 transition"
-      >
-        <div className="flex items-center gap-3">
-          <span>🛒</span>
-          <span>Cart</span>
-          
-        </div>
+        <li>
+          <Link
+            to="/cart"
+            className="
+          flex items-center justify-between
+          px-4 py-3 rounded-lg
+          text-gray-300
+          hover:text-white hover:bg-gray-800
+          transition
+        "
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span>🛒</span>
+              <span className="truncate">Cart</span>
+            </div>
 
-        <span className="bg-orange-700 text-white text-xs px-2 py-1 rounded-full">
-          {ordersCount}
-        </span>
-      </Link>
-    </li>
+            <span className="bg-orange-700 text-white text-xs px-2 py-1 rounded-full shrink-0">
+              {ordersCount}
+            </span>
+          </Link>
+        </li>
 
-    <li>
-      <a
-        href="#settings"
-        className="flex items-center gap-3 px-4 py-3 rounded-lg
-        text-gray-300 hover:text-white hover:bg-gray-800 transition"
-      >
-        <span>⚙️</span>
-        <span>Settings</span>
-      </a>
-    </li>
-    <li>
-      <a
-        href="/vendor_dashboard"
-        className="flex items-center gap-3 px-4 py-3 rounded-lg
-        text-gray-300 hover:text-white hover:bg-gray-800 transition"
-      >
-        <FaStore />
-        <span>My Shop Dashboard</span>
-      </a>
-    </li>
-  </ul>
+        <li>
+          <a
+            href="#settings"
+            className="
+          flex items-center gap-3
+          px-4 py-3 rounded-lg
+          text-gray-300
+          hover:text-white hover:bg-gray-800
+          transition
+        "
+          >
+            <span>⚙️</span>
+            <span>Settings</span>
+          </a>
+        </li>
 
-  {/* Divider */}
-  <div className="border-t border-gray-700 my-8"></div>
+        <li>
+          <a
+            href="/vendor_dashboard"
+            className="
+          flex items-center gap-3
+          px-4 py-3 rounded-lg
+          text-gray-300
+          hover:text-white hover:bg-gray-800
+          transition
+        "
+          >
+            <FaStore className="shrink-0" />
+            <span className="truncate">My Shop Dashboard</span>
+          </a>
+        </li>
+      </ul>
 
-  {/* Footer */}
-  <p className="text-xs text-gray-500 text-center">
-    © {new Date().getFullYear()} ByteEats
-  </p>
-</div>
+      {/* Divider */}
+      <div className="border-t border-gray-700 my-6 md:my-8"></div>
+
+      {/* Footer */}
+      <p className="text-xs text-gray-500 text-center mt-auto">
+        © {new Date().getFullYear()} ByteEats
+      </p>
+    </div>
 
   );
 };
@@ -203,156 +232,179 @@ export const Profile: React.FC = () => {
 
   return (
     <>
-  <div className="flex min-h-screen bg-gray-100">
-    <Sidebar />
+      <div className="flex min-h-screen bg-gray-100 overflow-x-hidden">
+        <Sidebar />
 
-    {/* Main Content */}
-    <div className="flex-1 p-6 md:p-10 space-y-8">
-      
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-800">
-          Welcome back 👋
-        </h1>
-        <p className="text-gray-500 mt-1">
-          Manage your profile and track your orders
-        </p>
-      </div>
-
-      {/* Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Profile Card */}
-        <div className="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
+        {/* Main Content */}
+        <div className="flex-1 p-4 sm:p-6 md:p-10 space-y-6 md:space-y-8">
+          {/* Header */}
           <div>
-            <h2 className="text-xl font-semibold text-orange-700 mb-4">
-              Profile Overview
-            </h2>
-
-            {userData ? (
-              <div className="space-y-4 text-sm">
-                <div>
-                  <p className="text-gray-500">User ID</p>
-                  <p className="text-gray-800 font-medium truncate">{userData.id}</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500">Email</p>
-                  <p className="text-gray-800 font-medium">{userData.email}</p>
-                </div>
-
-                <div>
-                  <p className="text-gray-500">Joined</p>
-                  <p className="text-gray-800 font-medium">
-                    {new Date(userData.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <p className="text-red-500">User data not found</p>
-            )}
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+              Welcome back 👋
+            </h1>
+            <p className="text-gray-500 mt-1 text-sm sm:text-base">
+              Manage your profile and track your orders
+            </p>
           </div>
 
-          <button
-            onClick={handleLogout}
-            className="mt-6 w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition"
-          >
-            Logout
-          </button>
-        </div>
+          {/* Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Profile Card */}
+            <div className="bg-white rounded-xl shadow p-5 sm:p-6 flex flex-col justify-between">
+              <div>
+                <h2 className="text-lg sm:text-xl font-semibold text-orange-700 mb-4">
+                  Profile Overview
+                </h2>
 
-        {/* Orders Section */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Recent Orders</h2>
+                {userData ? (
+                  <div className="space-y-4 text-sm">
+                    <div>
+                      <p className="text-gray-500">User ID</p>
+                      <p className="text-gray-800 font-medium break-all">
+                        {userData.id}
+                      </p>
+                    </div>
 
-          {orders.length === 0 ? (
-            <p className="text-gray-500">No orders placed yet.</p>
-          ) : (
-            <div className="space-y-4">
-              {orders.map((order) => (
-                <div
-                  key={order.id}
-                  onClick={() => handleOrderClick(order)}
-                  className="border rounded-lg p-4 hover:shadow-md cursor-pointer transition"
-                >
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm text-gray-500">
-                      {new Date(order.created_at).toLocaleDateString()} •{" "}
-                      {new Date(order.created_at).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                    <p className="font-semibold text-orange-700">
-                      ${order.total_price.toFixed(2)}
-                    </p>
+                    <div>
+                      <p className="text-gray-500">Email</p>
+                      <p className="text-gray-800 font-medium break-words">
+                        {userData.email}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-gray-500">Joined</p>
+                      <p className="text-gray-800 font-medium">
+                        {new Date(userData.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
+                ) : (
+                  <p className="text-red-500">User data not found</p>
+                )}
+              </div>
 
-                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {order.items?.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center gap-3 bg-gray-50 p-2 rounded-lg"
-                      >
-                        <img
-                          src={item.image}
-                          alt={item.title}
-                          className="w-12 h-12 rounded-md object-cover"
-                        />
-                        <div>
-                          <p className="text-sm font-medium">{item.title}</p>
-                          <p className="text-xs text-gray-500">
-                            {item.quantity} × ${item.price.toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
+              <button
+                onClick={handleLogout}
+                className="mt-6 w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition"
+              >
+                Logout
+              </button>
             </div>
-          )}
+
+            {/* Orders Section */}
+            <div className="lg:col-span-2 bg-white rounded-xl shadow p-5 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
+                Recent Orders
+              </h2>
+
+              {orders.length === 0 ? (
+                <p className="text-gray-500">No orders placed yet.</p>
+              ) : (
+                <div className="space-y-4">
+                  {orders.map((order) => (
+                    <div
+                      key={order.id}
+                      onClick={() => handleOrderClick(order)}
+                      className="border rounded-lg p-4 hover:shadow-md cursor-pointer transition"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                        <p className="text-sm text-gray-500">
+                          {new Date(order.created_at).toLocaleDateString()} •{" "}
+                          {new Date(order.created_at).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </p>
+
+                        <p className="font-semibold text-orange-700">
+                          ${order.total_price.toFixed(2)}
+                        </p>
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {order.items?.map((item, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-3 bg-gray-50 p-2 rounded-lg"
+                          >
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              className="w-12 h-12 rounded-md object-cover flex-shrink-0"
+                            />
+
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium truncate">
+                                {item.title}
+                              </p>
+
+                              <p className="text-xs text-gray-500">
+                                {item.quantity} × ${item.price.toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Account Settings */}
+          <div id="settings" className="text-center">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+              Account Setting ⚙️
+            </h1>
+
+            <p className="text-gray-500 mt-1 text-sm sm:text-base">
+              Manage your account to your taste
+            </p>
+          </div>
+
+          <AccountSetting />
         </div>
+
+        {/* Modal */}
+        {modalVisible && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md">
+              <h3 className="text-xl font-semibold mb-4">Cart Details</h3>
+
+              {cartItems.length === 0 ? (
+                <p className="text-gray-500">No items in the cart.</p>
+              ) : (
+                <ul className="space-y-2 text-sm">
+                  {cartItems.map((item, index) => (
+                    <li
+                      key={index}
+                      className="flex justify-between gap-4"
+                    >
+                      <span className="break-words">
+                        {item.quantity} × {item.title}
+                      </span>
+
+                      <span className="font-medium whitespace-nowrap">
+                        ${item.price.toFixed(2)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <button
+                onClick={closeModal}
+                className="mt-6 w-full bg-gray-800 text-white py-2 rounded-lg hover:bg-gray-900 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Account Settings */}
-      <div id="settings" className="text-center">
-        <h1 className="text-3xl font-bold text-gray-800">Account Setting ⚙️</h1>
-        <p className="text-gray-500 mt-1">Manage your account to your taste</p>
-      </div>
-      <AccountSetting />
-    </div>
-
-    {/* Modal */}
-    {modalVisible && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-xl p-6 w-96">
-          <h3 className="text-xl font-semibold mb-4">Cart Details</h3>
-
-          {cartItems.length === 0 ? (
-            <p className="text-gray-500">No items in the cart.</p>
-          ) : (
-            <ul className="space-y-2 text-sm">
-              {cartItems.map((item, index) => (
-                <li key={index} className="flex justify-between">
-                  <span>{item.quantity} × {item.title}</span>
-                  <span className="font-medium">${item.price.toFixed(2)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <button
-            onClick={closeModal}
-            className="mt-6 w-full bg-gray-800 text-white py-2 rounded-lg hover:bg-gray-900 transition"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    )}
-  </div>
-</>
+    </>
 
 
 

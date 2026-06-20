@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../Auth/supabaseClient';
-import type { Database } from '../Auth/database';
+import { useEffect, useState } from "react";
+import { supabase } from "../Auth/supabaseClient";
+import type { Database } from "../Auth/database";
 
-type Order = Database['public']['Tables']['orders']['Row'];
+type Order = Database["public"]["Tables"]["orders"]["Row"];
 
 interface UserOrdersProps {
   userId: string;
@@ -17,15 +17,41 @@ const UserOrders = ({ userId }: UserOrdersProps) => {
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        const { data, error: ordersError } = await supabase
-          .from('orders')
-          .select('*')
-          .eq('user_id', userId);
+        setError(null);
 
-        if (ordersError) throw ordersError;
-        setOrders(data || []);
+        // ✅ DEBUG: confirm correct userId is received
+        console.log("UserOrders received userId:", userId);
+
+        // ❌ prevent empty query
+        if (!userId) {
+          console.log("No userId provided");
+          setOrders([]);
+          setLoading(false);
+          return;
+        }
+
+        const { data, error: ordersError } = await supabase
+          .from("orders")
+          .select("*")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false });
+
+        // ✅ DEBUG: see raw response
+        console.log("Fetched orders:", data);
+        console.log("Orders error:", ordersError);
+
+        if (ordersError) {
+          throw ordersError;
+        }
+
+        setOrders(data ?? []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        console.error("Error fetching orders:", err);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "An error occurred while fetching orders."
+        );
       } finally {
         setLoading(false);
       }
@@ -49,27 +75,53 @@ const UserOrders = ({ userId }: UserOrdersProps) => {
   return (
     <div className="space-y-6">
       {orders.length === 0 ? (
-        <p className="text-gray-500">No orders found for this user.</p>
+        <p className="text-gray-500">
+          No orders found for this user.
+        </p>
       ) : (
         orders.map((order) => {
           let items: any[] = [];
+
           try {
-            items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
-          } catch {
+            items =
+              typeof order.items === "string"
+                ? JSON.parse(order.items)
+                : order.items ?? [];
+          } catch (e) {
+            console.error("Error parsing items:", e);
             items = [];
           }
 
           return (
-            <div key={order.id} className="border rounded-lg p-4 bg-white shadow-md">
+            <div
+              key={order.id}
+              className="border rounded-lg p-4 bg-white shadow-md"
+            >
               <div className="mb-4">
-                <p className="font-semibold text-lg">Order #{order.id}</p>
-                <p className="text-sm text-gray-500">
-                  Placed on: {new Date(order.created_at).toLocaleString()}
+                <p className="font-semibold text-lg">
+                  Order #{order.id}
                 </p>
-                <p className="text-sm text-gray-600">User Name: {order.recipient_name}</p>
-                <p className="text-sm text-gray-600">Delivery Address: {order.address}</p>
-                <p className="text-sm text-gray-600">Payment Status: {order.payment_status}</p>
-                <p className="text-sm text-gray-600">Order Status: {order.order_status}</p>
+
+                <p className="text-sm text-gray-500">
+                  Placed on:{" "}
+                  {new Date(order.created_at).toLocaleString()}
+                </p>
+
+                <p className="text-sm text-gray-600">
+                  User Name: {order.recipient_name}
+                </p>
+
+                <p className="text-sm text-gray-600">
+                  Delivery Address: {order.address}
+                </p>
+
+                <p className="text-sm text-gray-600">
+                  Payment Status: {order.payment_status}
+                </p>
+
+                <p className="text-sm text-gray-600">
+                  Order Status: {order.order_status}
+                </p>
               </div>
 
               {items.length > 0 && (
@@ -89,7 +141,8 @@ const UserOrders = ({ userId }: UserOrdersProps) => {
 
               <div className="mt-4 text-right">
                 <p className="text-lg font-semibold text-gray-800">
-                  Total: ${order.total_price?.toFixed(2)}
+                  Total: $
+                  {Number(order.total_price ?? 0).toFixed(2)}
                 </p>
               </div>
             </div>
