@@ -48,13 +48,6 @@ const Users = ({ onSelectUser }: UsersProps) => {
                 </p>
               </div>
             </div>
-
-            <button
-              onClick={() => onSelectUser(user.id)} // ✅ correct field
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-            >
-              View Orders
-            </button>
           </div>
         ))}
       </div>

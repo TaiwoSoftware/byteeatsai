@@ -10,7 +10,7 @@ interface UserOrdersProps {
 
 const UserOrders = ({ userId }: UserOrdersProps) => {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -19,39 +19,27 @@ const UserOrders = ({ userId }: UserOrdersProps) => {
         setLoading(true);
         setError(null);
 
-        // ✅ DEBUG: confirm correct userId is received
-        console.log("UserOrders received userId:", userId);
+        console.log("Selected userId:", userId);
 
-        // ❌ prevent empty query
         if (!userId) {
-          console.log("No userId provided");
           setOrders([]);
-          setLoading(false);
           return;
         }
 
-        const { data, error: ordersError } = await supabase
+        const { data, error } = await supabase
           .from("orders")
           .select("*")
           .eq("user_id", userId)
           .order("created_at", { ascending: false });
 
-        // ✅ DEBUG: see raw response
-        console.log("Fetched orders:", data);
-        console.log("Orders error:", ordersError);
+        if (error) throw error;
 
-        if (ordersError) {
-          throw ordersError;
-        }
+        console.log("Orders fetched:", data);
 
         setOrders(data ?? []);
       } catch (err) {
-        console.error("Error fetching orders:", err);
-        setError(
-          err instanceof Error
-            ? err.message
-            : "An error occurred while fetching orders."
-        );
+        console.error(err);
+        setError(err instanceof Error ? err.message : "Failed to load orders");
       } finally {
         setLoading(false);
       }
@@ -75,21 +63,20 @@ const UserOrders = ({ userId }: UserOrdersProps) => {
   return (
     <div className="space-y-6">
       {orders.length === 0 ? (
-        <p className="text-gray-500">
-          No orders found for this user.
-        </p>
+        <p className="text-gray-500">No orders found for this user.</p>
       ) : (
         orders.map((order) => {
+          // ✅ safer parsing for food items
           let items: any[] = [];
 
-          try {
-            items =
-              typeof order.items === "string"
-                ? JSON.parse(order.items)
-                : order.items ?? [];
-          } catch (e) {
-            console.error("Error parsing items:", e);
-            items = [];
+          if (Array.isArray(order.items)) {
+            items = order.items;
+          } else if (typeof order.items === "string") {
+            try {
+              items = JSON.parse(order.items);
+            } catch {
+              items = [];
+            }
           }
 
           return (
@@ -124,25 +111,29 @@ const UserOrders = ({ userId }: UserOrdersProps) => {
                 </p>
               </div>
 
+              {/* FOOD ITEMS DISPLAY */}
               {items.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
-                  {items.map((item, idx) =>
-                    item.image ? (
-                      <img
-                        key={idx}
-                        src={item.image}
-                        alt={`Ordered item ${idx + 1}`}
-                        className="w-full h-28 object-cover rounded-md border"
-                      />
-                    ) : null
-                  )}
+                  {items.map((item, idx) => (
+                    <div key={idx} className="text-center">
+                      {item.image && (
+                        <img
+                          src={item.image}
+                          alt={item.title || "food"}
+                          className="w-full h-28 object-cover rounded-md border"
+                        />
+                      )}
+                      <p className="text-xs mt-1 text-gray-600">
+                        {item.title}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               )}
 
               <div className="mt-4 text-right">
                 <p className="text-lg font-semibold text-gray-800">
-                  Total: $
-                  {Number(order.total_price ?? 0).toFixed(2)}
+                  Total: ${Number(order.total_price ?? 0).toFixed(2)}
                 </p>
               </div>
             </div>

@@ -33,6 +33,7 @@ interface CartItem {
 
 const Sidebar: React.FC = () => {
   const [ordersCount, setOrdersCount] = useState<number>(0); // Total count of items in the cart
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     // Fetch cart data from localStorage
@@ -43,105 +44,112 @@ const Sidebar: React.FC = () => {
   }, []);
 
   return (
-    <div
-      className="
-    bg-gray-900 text-white
-    w-full md:w-64
-    md:min-h-screen
-    p-4 sm:p-6
-    flex flex-col
-    shrink-0
-  "
-    >
-      {/* Brand */}
-      <h2 className="text-xl sm:text-2xl font-bold text-orange-700 mb-6 md:mb-10">
-        My Account
-      </h2>
 
-      {/* Menu */}
-      <ul className="space-y-2 md:space-y-3">
-        <li>
-          <a
-            href="#profile"
-            className="
-          flex items-center gap-3
-          px-4 py-3 rounded-lg
-          text-gray-300
-          hover:text-white hover:bg-gray-800
-          transition
-        "
-          >
-            <span>👤</span>
-            <span>Profile</span>
-          </a>
-        </li>
+    <>
+      {/* Mobile Top Bar */}
+      <div className="md:hidden flex items-center justify-between bg-gray-900 text-white p-4">
 
-        <li>
-          <Link
-            to="/cart"
-            className="
-          flex items-center justify-between
-          px-4 py-3 rounded-lg
-          text-gray-300
-          hover:text-white hover:bg-gray-800
-          transition
-        "
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <span>🛒</span>
-              <span className="truncate">Cart</span>
-            </div>
+        <button
+          onClick={() => setOpen(!open)}
+          className="text-white text-2xl"
+        >
+          ☰
+        </button>
+      </div>
 
-            <span className="bg-orange-700 text-white text-xs px-2 py-1 rounded-full shrink-0">
-              {ordersCount}
-            </span>
-          </Link>
-        </li>
+      {/* Overlay (mobile) */}
+      {open && (
+        <div
+          onClick={() => setOpen(false)}
+          className="fixed inset-0 bg-black/50 md:hidden z-40"
+        />
+      )}
 
-        <li>
-          <a
-            href="#settings"
-            className="
-          flex items-center gap-3
-          px-4 py-3 rounded-lg
-          text-gray-300
-          hover:text-white hover:bg-gray-800
-          transition
-        "
-          >
-            <span>⚙️</span>
-            <span>Settings</span>
-          </a>
-        </li>
+      {/* Sidebar */}
+      <div
+        className={`
+          fixed md:static top-0 left-0 z-50
+          h-full md:h-auto
+          w-72 md:w-64
+          bg-gray-900 text-white p-6
+          transform transition-transform duration-300
+          ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        `}
+      >
+        {/* Brand */}
+        <h2 className="text-2xl font-bold text-orange-700 mb-10">
+          My Account
+        </h2>
 
-        <li>
-          <a
-            href="/vendor_dashboard"
-            className="
-          flex items-center gap-3
-          px-4 py-3 rounded-lg
-          text-gray-300
-          hover:text-white hover:bg-gray-800
-          transition
-        "
-          >
-            <FaStore className="shrink-0" />
-            <span className="truncate">My Shop Dashboard</span>
-          </a>
-        </li>
-      </ul>
+        {/* Menu */}
+        <ul className="space-y-3">
+          <li>
+            <a
+              href="#profile"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg
+              text-gray-300 hover:text-white hover:bg-gray-800 transition"
+            >
+              <span>👤</span>
+              <span>Profile</span>
+            </a>
+          </li>
 
-      {/* Divider */}
-      <div className="border-t border-gray-700 my-6 md:my-8"></div>
+          <li>
+            <Link
+              to="/cart"
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-between px-4 py-3 rounded-lg
+              text-gray-300 hover:text-white hover:bg-gray-800 transition"
+            >
+              <div className="flex items-center gap-3">
+                <span>🛒</span>
+                <span>Cart</span>
+              </div>
 
-      {/* Footer */}
-      <p className="text-xs text-gray-500 text-center mt-auto">
-        © {new Date().getFullYear()} ByteEats
-      </p>
-    </div>
+              <span className="bg-orange-700 text-white text-xs px-2 py-1 rounded-full">
+                {ordersCount}
+              </span>
+            </Link>
+          </li>
 
+          <li>
+            <a
+              href="#settings"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg
+              text-gray-300 hover:text-white hover:bg-gray-800 transition"
+            >
+              <span>⚙️</span>
+              <span>Settings</span>
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="/vendor_dashboard"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg
+              text-gray-300 hover:text-white hover:bg-gray-800 transition"
+            >
+              <FaStore />
+              <span>My Shop Dashboard</span>
+            </a>
+          </li>
+        </ul>
+
+        {/* Divider */}
+        <div className="border-t border-gray-700 my-8"></div>
+
+        {/* Footer */}
+        <p className="text-xs text-gray-500 text-center">
+          © {new Date().getFullYear()} ByteEats
+        </p>
+      </div>
+    </>
   );
 };
+
 
 export const Profile: React.FC = () => {
   const [userData, setUserData] = useState<User | null>(null);
