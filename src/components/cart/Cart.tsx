@@ -189,7 +189,7 @@ export const Cart = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 md:px-12">
+    <div id="cart-items"className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 md:px-12">
       <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">Your Cart</h1>
 
       {cart.length === 0 ? (

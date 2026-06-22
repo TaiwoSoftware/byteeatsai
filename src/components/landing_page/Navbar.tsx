@@ -89,7 +89,7 @@ export const Navbar = () => {
         <div className="hidden lg:flex gap-4 items-center">
           <Link to="/cart">
             <div className="bg-[#a82f17] w-11 p-2 rounded-full">
-              <BiCart className="text-3xl text-white" />
+              <BiCart id="cart-btn" className="text-3xl text-white" />
             </div>
           </Link>
 

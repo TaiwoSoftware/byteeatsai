@@ -1,138 +1,131 @@
-import { useEffect, useRef, useState } from "react";
-import ChatbotForm from "./ChatbotForm";
-import ChatMessage from "./ChatMessage";
+import { useState } from "react";
+import { getGuideResponse } from "../TourGuide/getGuideResponse";
 
-export type ChatMessageType = {
-  role: "user" | "bot";
-  text: string;
-};
+const delay = (ms: number) =>
+  new Promise((res) => setTimeout(res, ms));
 
-const ChatbotAI: React.FC = () => {
-  const [open, setOpen] = useState<boolean>(false);
-  const [chatHistory, setChatHistory] = useState<ChatMessageType[]>([]);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const geminiModel = import.meta.env.VITE_GEMINI_MODEL || "gemini-2.0-flash";
+const GuideChatbot = () => {
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatHistory]);
+  const [messages, setMessages] = useState([
+    {
+      role: "bot",
+      text: "Hi 👋 I can guide you on how to use the website. Ask me anything!",
+    },
+  ]);
 
-  const generateBotResponse = async (
-    history: ChatMessageType[]
-  ): Promise<void> => {
-    setChatHistory((prev) => [...prev, { role: "bot", text: "Thinking..." }]);
+  // ✨ typing effect helper
+  const typeText = async (text: string) => {
+    let output = "";
 
-    const payload = history.map(({ role, text }) => ({
-      role: role === "bot" ? "model" : "user",
-      parts: [{ text }],
-    }));
+    for (let i = 0; i < text.length; i++) {
+      output += text[i];
 
-    try {
-      const proxyApiUrl = import.meta.env.VITE_API_URL as string | undefined;
-      const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY as
-        | string
-        | undefined;
-      const apiUrl =
-        proxyApiUrl ||
-        (geminiApiKey
-          ? `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`
-          : undefined);
-
-      if (!apiUrl) {
-        throw new Error(
-          "Missing AI config. Add VITE_GEMINI_API_KEY or VITE_API_URL to your .env file."
-        );
-      }
-
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: payload }),
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = {
+          role: "bot",
+          text: output,
+        };
+        return updated;
       });
 
-      const responseText = await response.text();
-      const data = responseText ? JSON.parse(responseText) : null;
-
-      if (!response.ok) {
-        throw new Error(
-          data?.error?.message ||
-            `Chatbot request failed with status ${response.status}`
-        );
-      }
-
-      const botText =
-        data?.candidates?.[0]?.content?.parts?.[0]?.text
-          ?.replace(/\n/g, "<br />")
-          ?.trim() || "I couldn't understand that.";
-
-      setChatHistory((prev) => [
-        ...prev.filter((msg) => msg.text !== "Thinking..."),
-        { role: "bot", text: botText },
-      ]);
-    } catch (error) {
-      console.error(error);
-
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Unable to get a chatbot response.";
-
-      setChatHistory((prev) => [
-        ...prev.filter((msg) => msg.text !== "Thinking..."),
-        { role: "bot", text: `Oops! ${errorMessage}` },
-      ]);
+      await delay(10); // typing speed
     }
+  };
+
+  const sendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || loading) return;
+
+    const userMsg = { role: "user", text: input };
+
+    setMessages((prev) => [...prev, userMsg]);
+
+    setInput("");
+    setLoading(true);
+
+    // 🧠 fake AI thinking delay
+    await delay(800);
+
+    // get response
+    const response = await getGuideResponse(input);
+
+    // add empty bot message first (for typing effect)
+    setMessages((prev) => [
+      ...prev,
+      { role: "bot", text: "" },
+    ]);
+
+    await typeText(response);
+
+    setLoading(false);
   };
 
   return (
     <>
+      {/* Floating Button */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-orange-600 text-2xl text-white shadow-lg transition hover:bg-orange-700"
-        aria-label="Open AI assistant"
+        className="fixed bottom-6 right-6 z-50 bg-orange-600 text-white px-4 py-3 rounded-full shadow-lg"
       >
         Chat
       </button>
 
       {open && (
-        <div className="fixed bottom-0 right-0 z-50 flex h-[70vh] w-full flex-col rounded-t-2xl border-t bg-white shadow-2xl sm:w-96 sm:rounded-lg sm:border">
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white p-4">
-            <h3 className="text-lg font-semibold text-gray-800">AI Assistant</h3>
-            <button
-              onClick={() => setOpen(false)}
-              className="text-xl text-gray-500 hover:text-gray-700"
-              aria-label="Close AI assistant"
-            >
-              x
-            </button>
+        <div className="fixed bottom-0 right-0 z-50 w-full sm:w-96 h-[70vh] bg-white shadow-2xl border flex flex-col">
+
+          {/* Header */}
+          <div className="p-4 bg-orange-600 text-white flex justify-between">
+            <h2>Guide Assistant</h2>
+            <button onClick={() => setOpen(false)}>✕</button>
           </div>
 
-          <div className="flex flex-1 flex-col gap-3 overflow-y-auto bg-gray-50 p-4">
-            {chatHistory.length === 0 && (
-              <div className="mt-10 text-center text-sm text-gray-400">
-                <p>No messages yet</p>
-                <p>Start typing below</p>
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                className={`p-3 rounded-lg whitespace-pre-line ${
+                  msg.role === "user"
+                    ? "bg-orange-600 text-white ml-auto w-fit"
+                    : "bg-white border w-fit"
+                }`}
+              >
+                {msg.text}
               </div>
-            )}
-
-            {chatHistory.map((chat, index) => (
-              <ChatMessage key={index} chat={chat} />
             ))}
 
-            <div ref={messagesEndRef} />
+            {/* typing indicator */}
+            {loading && (
+              <div className="text-sm text-gray-400 animate-pulse">
+                AI is thinking...
+              </div>
+            )}
           </div>
 
-          <div className="sticky bottom-0 z-10 border-t bg-white p-4">
-            <ChatbotForm
-              chatHistory={chatHistory}
-              setChatHistory={setChatHistory}
-              generateBotResponse={generateBotResponse}
+          {/* Input */}
+          <form onSubmit={sendMessage} className="p-3 border-t flex gap-2">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask how to order food..."
+              className="flex-1 border rounded px-3 py-2"
             />
-          </div>
+
+            <button
+              disabled={loading}
+              className="bg-orange-600 text-white px-4 rounded"
+            >
+              Send
+            </button>
+          </form>
         </div>
       )}
     </>
   );
 };
 
-export default ChatbotAI;
+export default GuideChatbot;
