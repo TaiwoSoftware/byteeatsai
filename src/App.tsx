@@ -19,8 +19,8 @@ import UserSelection from "./components/landing_page/UserSelection";
 import { AdminDashboard } from "./components/Admin/AdminDashboard";
 import { ConfirmEmail } from "./components/Auth/ConfirmEmail";
 import BlockchainIntegration from "./components/BlockchainIntegration/BlockchainIntegration";
-import ChatbotAI from "./components/chatbot/ChatbotAI";
 import Order from "./components/Order/Order";
+import ChatbotWidget from "./components/chatbot/ChatBotWidget";
 // import { TrackOrderPa } from "./components/cart/TrackOrderPage";
 export const App = () => {
   return (
@@ -47,7 +47,7 @@ export const App = () => {
             <Route path="/vendor_dashboard" element={<VendorsDashboard />} />
             <Route path="/blockchain" element={<BlockchainIntegration />} />
           </Routes>
-          <ChatbotAI />
+          <ChatbotWidget />
           <Footer />
         </Router>
       </CartProvider>
