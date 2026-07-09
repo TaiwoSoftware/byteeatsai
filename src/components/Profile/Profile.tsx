@@ -43,18 +43,38 @@ const Sidebar: React.FC = () => {
     setOrdersCount(storedCart.length);
   }, []);
 
+  // Lock body scroll while the mobile sidebar is open, so the page
+  // behind it doesn't scroll along with it.
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   return (
 
     <>
       {/* Mobile Top Bar */}
-      <div className="md:hidden flex items-center justify-between bg-gray-900 text-white p-4">
-
+      <div className="md:hidden flex items-center justify-between bg-gray-900 text-white p-4 sticky top-0 z-30">
         <button
           onClick={() => setOpen(!open)}
-          className="text-white text-2xl"
+          className="text-white text-2xl leading-none w-8 h-8 flex items-center justify-center flex-shrink-0"
+          aria-label={open ? "Close menu" : "Open menu"}
         >
-          ☰
+          {open ? "✕" : "☰"}
         </button>
+
+        <span className="font-semibold text-orange-500 truncate px-2">
+          My Account
+        </span>
+
+        {/* Spacer to keep the title visually centered against the button */}
+        <span className="w-8 h-8 flex-shrink-0" aria-hidden="true" />
       </div>
 
       {/* Overlay (mobile) */}
@@ -72,6 +92,7 @@ const Sidebar: React.FC = () => {
           h-full md:h-auto
           w-72 md:w-64
           bg-gray-900 text-white p-6
+          overflow-y-auto
           transform transition-transform duration-300
           ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
@@ -240,11 +261,11 @@ export const Profile: React.FC = () => {
 
   return (
     <>
-      <div className="flex min-h-screen bg-gray-100 overflow-x-hidden">
+      <div className="flex flex-col md:flex-row min-h-screen bg-gray-100 overflow-x-hidden">
         <Sidebar />
 
         {/* Main Content */}
-        <div className="flex-1 p-4 sm:p-6 md:p-10 space-y-6 md:space-y-8">
+        <div className="flex-1 min-w-0 p-4 sm:p-6 md:p-10 space-y-6 md:space-y-8">
           {/* Header */}
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
@@ -378,7 +399,7 @@ export const Profile: React.FC = () => {
         {/* Modal */}
         {modalVisible && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <div className="bg-white rounded-xl p-6 w-full max-w-md max-h-[85vh] overflow-y-auto">
               <h3 className="text-xl font-semibold mb-4">Cart Details</h3>
 
               {cartItems.length === 0 ? (

@@ -1,7 +1,8 @@
 export const guideResponses: Record<string, string> = {
   // 🏠 HOME / GENERAL
   default: `
-I can help you with anything on this website 👇
+Hi there! 👋 I'm your guide assistant 🤖
+  I can help you with anything on this website 👇
 
 🛍️ Ordering food  
 🛒 Using your cart  
