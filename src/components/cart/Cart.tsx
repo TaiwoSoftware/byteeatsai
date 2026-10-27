@@ -42,8 +42,7 @@ const ORDER_STATUSES = [
   "Delivered",
 ];
 
-// Replace with your actual Paystack public key (or read it from an env
-// variable, e.g. import.meta.env.VITE_PAYSTACK_PUBLIC_KEY if using Vite).
+
 const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 
 export const Cart = () => {
