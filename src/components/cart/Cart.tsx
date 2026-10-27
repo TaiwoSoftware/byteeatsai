@@ -1,3 +1,5 @@
+// @ts-expect-error -- @paystack/inline-js does not provide TypeScript declarations.
+import PaystackPop from "@paystack/inline-js";
 import { useState, useEffect } from "react";
 import { FaShoppingCart } from "react-icons/fa";
 import { useCart } from "./CartContext";
@@ -11,18 +13,13 @@ interface CartItem {
   image: string;
 }
 
-interface PaymentMethod {
-  cardNumber: string;
-  cvv: string;
-  expiryDate: string;
-}
-
 interface OrderData {
   items: CartItem[];
   total_price: number;
   recipient_name: string;
   address: string;
   payment_method: string;
+  payment_reference: string;
   user_email: string;
   order_status: string;
 }
@@ -30,6 +27,10 @@ interface OrderData {
 interface FoodImage {
   id: string;
   image_url: string;
+}
+
+interface PaystackTransaction {
+  reference?: string;
 }
 
 const ORDER_STATUSES = [
@@ -41,22 +42,24 @@ const ORDER_STATUSES = [
   "Delivered",
 ];
 
+// Replace with your actual Paystack public key (or read it from an env
+// variable, e.g. import.meta.env.VITE_PAYSTACK_PUBLIC_KEY if using Vite).
+const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+
 export const Cart = () => {
   const { cart, clearCart } = useCart();
   const [recipientName, setRecipientName] = useState("");
   const [address, setAddress] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>({
-    cardNumber: "",
-    cvv: "",
-    expiryDate: "",
-  });
   const [foodImages, setFoodImages] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [showTrackingModal, setShowTrackingModal] = useState(false);
   const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
   const [orderStatus, setOrderStatus] = useState("");
 
-  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalPrice = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
 
   useEffect(() => {
     if (cart.length === 0) return;
@@ -66,14 +69,20 @@ export const Cart = () => {
         const { data, error } = await supabase
           .from("foods")
           .select("id, image_url")
-          .in("id", cart.map((item) => item.id));
+          .in(
+            "id",
+            cart.map((item) => item.id),
+          );
 
         if (error) throw error;
 
-        const map = data?.reduce((acc: Record<string, string>, item: FoodImage) => {
-          acc[item.id] = item.image_url;
-          return acc;
-        }, {});
+        const map = data?.reduce(
+          (acc: Record<string, string>, item: FoodImage) => {
+            acc[item.id] = item.image_url;
+            return acc;
+          },
+          {},
+        );
         setFoodImages(map || {});
       } catch (error) {
         console.error("Error loading images:", error);
@@ -98,7 +107,7 @@ export const Cart = () => {
         },
         (payload) => {
           setOrderStatus(payload.new.order_status);
-        }
+        },
       )
       .subscribe();
 
@@ -111,7 +120,7 @@ export const Cart = () => {
     const itemLines = orderData.items
       .map(
         (item) =>
-          `${item.quantity} x ${item.title} - $${(item.price * item.quantity).toFixed(2)}`
+          `${item.quantity} x ${item.title} - ₦${(item.price * item.quantity).toFixed(2)}`,
       )
       .join("<br/>");
 
@@ -131,7 +140,7 @@ export const Cart = () => {
         "service_byte",
         "template_ycuyjpi",
         emailParams,
-        "KZ5IuiyfkxTw53AN8"
+        "KZ5IuiyfkxTw53AN8",
       );
       if (res.status === 200) console.log("Email sent", res);
     } catch (err) {
@@ -140,17 +149,15 @@ export const Cart = () => {
     }
   };
 
-  const placeOrder = async () => {
-    if (!recipientName || !address || !paymentMethod.cardNumber || !paymentMethod.cvv || !paymentMethod.expiryDate) {
-      return alert("All fields are required.");
-    }
-    if (cart.length === 0) return alert("Your cart is empty.");
-
-    setLoading(true);
+  // Runs after Paystack confirms the payment succeeded — writes the order
+  // to Supabase, sends the confirmation email, and opens the tracking modal.
+  // This is the same thing placeOrder used to do, just triggered by
+  // Paystack's onSuccess instead of a direct button click.
+  const finalizeOrder = async (
+    user: { id: string; email?: string | null },
+    reference: string,
+  ) => {
     try {
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (!user || authError) throw new Error("Login required to place order.");
-
       const orderData: OrderData & { user_id: string } = {
         items: cart.map((item) => ({
           ...item,
@@ -159,13 +166,17 @@ export const Cart = () => {
         total_price: totalPrice,
         recipient_name: recipientName,
         address,
-        payment_method: JSON.stringify(paymentMethod),
+        payment_method: "Paystack",
+        payment_reference: reference,
         user_email: user.email || "",
         order_status: "Order Placed",
         user_id: user.id,
       };
 
-      const { data, error } = await supabase.from("orders").insert([orderData]).select();
+      const { data, error } = await supabase
+        .from("orders")
+        .insert([orderData])
+        .select();
       if (error) throw new Error(error.message);
 
       if (data?.[0]?.id) {
@@ -177,8 +188,61 @@ export const Cart = () => {
       }
     } catch (err) {
       console.error("Order Error:", err);
-      alert(err instanceof Error ? err.message : "Failed to place order.");
+      alert(
+        err instanceof Error
+          ? err.message
+          : "Failed to save your order after payment.",
+      );
     } finally {
+      setLoading(false);
+    }
+  };
+
+  // Validates the delivery details, then hands off to Paystack's checkout
+  // popup. Card number / CVV / expiry are no longer collected here —
+  // Paystack's own secure popup takes care of that.
+  const payWithPaystack = async () => {
+    if (!recipientName || !address) {
+      return alert("All fields are required.");
+    }
+    if (cart.length === 0) return alert("Your cart is empty.");
+
+    setLoading(true);
+
+    try {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (!user || authError) {
+        throw new Error("Login required to place order.");
+      }
+
+      const reference = `order_${Date.now()}`;
+
+      const popup = new PaystackPop();
+      popup.newTransaction({
+        key: PAYSTACK_PUBLIC_KEY,
+        email: user.email || "",
+        amount: Math.round(totalPrice * 100), // Paystack expects the amount in the smallest currency unit (kobo/cents)
+        currency: "NGN", // change to "NGN" (or your actual currency) if your prices aren't in USD
+        reference,
+        onSuccess: (transaction: PaystackTransaction) => {
+          finalizeOrder(user, transaction.reference || reference);
+        },
+        onCancel: () => {
+          setLoading(false);
+        },
+        onError: (error: unknown) => {
+          console.error("Paystack error:", error);
+          alert("Payment failed. Please try again.");
+          setLoading(false);
+        },
+      });
+    } catch (err) {
+      console.error("Payment Error:", err);
+      alert(err instanceof Error ? err.message : "Failed to start payment.");
       setLoading(false);
     }
   };
@@ -189,8 +253,13 @@ export const Cart = () => {
   };
 
   return (
-    <div id="cart-items"className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 md:px-12">
-      <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">Your Cart</h1>
+    <div
+      id="cart-items"
+      className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 md:px-12"
+    >
+      <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">
+        Your Cart
+      </h1>
 
       {cart.length === 0 ? (
         <p className="text-center text-gray-600 text-lg">Your cart is empty.</p>
@@ -212,8 +281,13 @@ export const Cart = () => {
                   className="w-20 h-20 rounded-lg object-cover"
                 />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-800 text-lg">{item.title}</h3>
-                  <p className="text-orange-600 font-bold">${item.price}</p>
+                  <h3 className="font-semibold text-gray-800 text-lg">
+                    {item.title}
+                  </h3>
+                  <p className="text-orange-600 font-bold">
+                    {" "}
+                    ₦{item.price.toLocaleString("en-NG")}
+                  </p>
                   <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                 </div>
               </div>
@@ -221,7 +295,14 @@ export const Cart = () => {
             <div className="pt-4 border-t border-gray-300">
               <h2 className="text-xl font-semibold flex justify-between">
                 <span>Total:</span>
-                <span className="text-orange-600">${totalPrice.toFixed(2)}</span>
+                <span className="text-orange-600">
+                  {" "}
+                  ₦
+                  {totalPrice.toLocaleString("en-NG", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
               </h2>
             </div>
           </div>
@@ -244,30 +325,6 @@ export const Cart = () => {
                 setter: setAddress,
                 type: "textarea",
                 placeholder: "Enter delivery address",
-              },
-              {
-                label: "Card Number",
-                value: paymentMethod.cardNumber,
-                setter: (v: string) =>
-                  setPaymentMethod({ ...paymentMethod, cardNumber: v }),
-                type: "text",
-                placeholder: "xxxx xxxx xxxx xxxx",
-              },
-              {
-                label: "CVV",
-                value: paymentMethod.cvv,
-                setter: (v: string) =>
-                  setPaymentMethod({ ...paymentMethod, cvv: v }),
-                type: "text",
-                placeholder: "CVV",
-              },
-              {
-                label: "Expiry Date",
-                value: paymentMethod.expiryDate,
-                setter: (v: string) =>
-                  setPaymentMethod({ ...paymentMethod, expiryDate: v }),
-                type: "text",
-                placeholder: "MM/YY",
               },
             ].map(({ label, value, setter, type, placeholder }, idx) => (
               <div className="mb-4" key={idx}>
@@ -293,12 +350,12 @@ export const Cart = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
               <button
-                onClick={placeOrder}
+                onClick={payWithPaystack}
                 disabled={loading}
                 className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 flex items-center justify-center gap-2"
               >
                 <FaShoppingCart />
-                {loading ? "Placing..." : "Place Order"}
+                {loading ? "Processing..." : "Pay Now"}
               </button>
               <button
                 onClick={clearCart}

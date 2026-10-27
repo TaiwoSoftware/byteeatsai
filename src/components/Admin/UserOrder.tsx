@@ -133,7 +133,7 @@ const UserOrders = ({ userId }: UserOrdersProps) => {
 
               <div className="mt-4 text-right">
                 <p className="text-lg font-semibold text-gray-800">
-                  Total: ${Number(order.total_price ?? 0).toFixed(2)}
+                  Total: {Number(order.total_price ?? 0).toFixed(2)}
                 </p>
               </div>
             </div>

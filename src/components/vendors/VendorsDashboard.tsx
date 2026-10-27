@@ -153,13 +153,14 @@ export const VendorsDashboard = () => {
 
     setDeletingFoodId(food.id);
     try {
-      const { error: deleteError } = await supabase
+      const { data, error } = await supabase
         .from("foods")
         .delete()
         .eq("id", food.id)
-        .eq("vendor_id", vendor.id);
+        .select();
 
-      if (deleteError) throw deleteError;
+      console.log(data);
+      console.log(error);
 
       await fetchVendorFoodsAndOrders(vendor.id);
     } catch (err: any) {
